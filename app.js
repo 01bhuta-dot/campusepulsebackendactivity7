@@ -6,9 +6,18 @@ const { renderGuide } = require("./guide");
 function createApp(database, { baseUrl, clientOrigins = "" } = {}) {
   const app = express();
   const origins = clientOrigins.split(",").map(value => value.trim()).filter(Boolean);
+
   app.disable("x-powered-by");
   app.disable("etag");
-  app.use(cors({ origin: origins }));
+
+  app.use(cors({
+    origin: [
+      ...origins,
+      "https://activity8-intergration.onrender.com",
+      "http://127.0.0.1:5501"
+    ]
+  }));
+
   app.use((req, res, next) => {
     res.set("Cache-Control", "no-store");
     next();
