@@ -19,12 +19,15 @@ function openDatabase(filename = join(__dirname, "data", "records.sqlite")) {
     connection.close();
     throw error;
   }
+  function bindings(params) {
+    return Object.fromEntries(params.map((value, index) => [`$${index + 1}`, value]));
+  }
   return {
     async all(sql, ...params) {
-      return connection.prepare(sql).all(...params);
+      return connection.prepare(sql).all(bindings(params));
     },
     async first(sql, ...params) {
-      return connection.prepare(sql).get(...params);
+      return connection.prepare(sql).get(bindings(params));
     }
   };
 }
