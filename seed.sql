@@ -12,4 +12,4 @@ INSERT INTO records (title, category, description, status)
 SELECT title, category, description, status FROM seed
 WHERE NOT EXISTS (SELECT 1 FROM seed_history WHERE name = 'campuspulse-it-support-v1');
 
-INSERT OR IGNORE INTO seed_history (name) VALUES ('campuspulse-it-support-v1');
+INSERT INTO seed_history (name) VALUES ('campuspulse-it-support-v1') ON CONFLICT (name) DO NOTHING;

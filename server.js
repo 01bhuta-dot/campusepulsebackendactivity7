@@ -1,20 +1,20 @@
 require("dotenv").config({ quiet: true });
 const { createApp } = require("./app");
 const { openDatabase } = require("./db");
-const { openHostedDatabase } = require("./hosted-db");
+const { openPostgres } = require("./postgres");
 
 async function start() {
-  const { TURSO_DATABASE_URL, TURSO_AUTH_TOKEN, RENDER } = process.env;
-  if (RENDER === "true" && (!TURSO_DATABASE_URL || !TURSO_AUTH_TOKEN)) {
-    throw new Error("Set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN to the project's hosted SQLite database.");
+  const { DATABASE_URL, RENDER, RENDER_EXTERNAL_URL } = process.env;
+  if ((RENDER === "true" || RENDER_EXTERNAL_URL) && !DATABASE_URL) {
+    throw new Error("Set DATABASE_URL to the Internal Database URL from Render Postgres.");
   }
 
   const port = Number(process.env.PORT || 3000);
-  const database = TURSO_DATABASE_URL
-    ? await openHostedDatabase(TURSO_DATABASE_URL, TURSO_AUTH_TOKEN)
+  const database = DATABASE_URL
+    ? await openPostgres(DATABASE_URL)
     : openDatabase(process.env.DATABASE_PATH);
   const app = createApp(database, {
-    baseUrl: process.env.API_BASE_URL || process.env.RENDER_EXTERNAL_URL || `http://localhost:${port}`,
+    baseUrl: process.env.API_BASE_URL || RENDER_EXTERNAL_URL || `http://localhost:${port}`,
     clientOrigins: process.env.CLIENT_ORIGINS
   });
   app.listen(port, "0.0.0.0", () => console.log(`API listening on port ${port}`));
