@@ -47,13 +47,13 @@ function createRecordsRouter(database) {
   });
 
   router.get("/:id", async (req, res) => {
-    const record = await database.first("SELECT * FROM records WHERE id = ?", req.recordId);
+    const record = await database.first("SELECT * FROM records WHERE id = $1", req.recordId);
     return record ? res.json(record) : missingRecord(res);
   });
 
   router.post("/", validateRecord, async (req, res) => {
     const record = await database.first(
-      "INSERT INTO records (title, category, description, status) VALUES (?, ?, ?, ?) RETURNING *",
+      "INSERT INTO records (title, category, description, status) VALUES ($1, $2, $3, $4) RETURNING *",
       ...req.recordValues
     );
     res.location(`/api/records/${record.id}`).status(201).json(record);
@@ -61,7 +61,7 @@ function createRecordsRouter(database) {
 
   router.put("/:id", validateRecord, async (req, res) => {
     const record = await database.first(
-      "UPDATE records SET title = ?, category = ?, description = ?, status = ? WHERE id = ? RETURNING *",
+      "UPDATE records SET title = $1, category = $2, description = $3, status = $4 WHERE id = $5 RETURNING *",
       ...req.recordValues,
       req.recordId
     );
@@ -69,7 +69,7 @@ function createRecordsRouter(database) {
   });
 
   router.delete("/:id", async (req, res) => {
-    const record = await database.first("DELETE FROM records WHERE id = ? RETURNING id", req.recordId);
+    const record = await database.first("DELETE FROM records WHERE id = $1 RETURNING id", req.recordId);
     return record ? res.json({ message: "Record deleted." }) : missingRecord(res);
   });
 
